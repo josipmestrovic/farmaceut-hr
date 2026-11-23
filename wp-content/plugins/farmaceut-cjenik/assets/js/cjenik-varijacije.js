@@ -9,11 +9,34 @@
 		return $root;
 	}
 
+	function zapamtiParentHtml($root) {
+		if ($root.data('farmaceutCjenikParentHtml')) {
+			return;
+		}
+		$root.data('farmaceutCjenikParentHtml', {
+			className: $root.attr('class') || '',
+			html: $root.html()
+		});
+	}
+
+	function vratiParentHtml($root) {
+		var parent = $root.data('farmaceutCjenikParentHtml');
+		if (!parent) {
+			return false;
+		}
+		$root.attr('class', parent.className);
+		$root.attr('data-farmaceut-cjenik-root', '');
+		$root.html(parent.html);
+		return true;
+	}
+
 	function azurirajCjenik($form, html) {
 		var $root = nadjiRoot($form);
 		if (!$root.length) {
 			return;
 		}
+
+		zapamtiParentHtml($root);
 
 		if (typeof html === 'string' && html.length) {
 			var $tmp = $('<div>').append($.parseHTML(html));
@@ -28,9 +51,11 @@
 			return;
 		}
 
-		$root.find('[data-farmaceut-cjenik-bazna]').empty();
-		$root.find('[data-farmaceut-cjenik-jedinicna]').attr('hidden', true).empty();
-		$root.find('[data-farmaceut-cjenik-omnibus]').attr('hidden', true).empty();
+		if (!vratiParentHtml($root)) {
+			$root.find('[data-farmaceut-cjenik-bazna]').empty();
+			$root.find('[data-farmaceut-cjenik-jedinicna]').attr('hidden', true).empty();
+			$root.find('[data-farmaceut-cjenik-omnibus]').attr('hidden', true).empty();
+		}
 	}
 
 	$(document.body).on('found_variation', 'form.variations_form', function (event, variation) {
