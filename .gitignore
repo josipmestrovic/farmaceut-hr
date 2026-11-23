@@ -4,9 +4,7 @@
 # Track Git configuration
 !/.gitignore
 
-# Project docs
 !/README.md
-!/AGENTS.md
 
 # GitHub Actions
 !/.github/
