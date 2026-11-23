@@ -103,7 +103,7 @@ function farmaceut_cjenik_html_cijena( WC_Product $proizvod, string $kontekst = 
 		return '';
 	}
 
-	return '<div class="farmaceut-cjenik farmaceut-cjenik--' . esc_attr( $kontekst ) . '">' . implode( '', $dijelovi ) . '</div>';
+	return '<div class="farmaceut-cjenik farmaceut-cjenik--' . esc_attr( $kontekst ) . '" data-farmaceut-cjenik-root>' . implode( '', $dijelovi ) . '</div>';
 }
 
 /**
