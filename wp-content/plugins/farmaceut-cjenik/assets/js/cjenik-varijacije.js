@@ -30,13 +30,32 @@
 		return true;
 	}
 
-	function azurirajCjenik($form, html) {
+	function isprazniCjenik($root) {
+		$root.attr('class', 'farmaceut-cjenik farmaceut-cjenik--varijacija');
+		$root.attr('data-farmaceut-cjenik-root', '');
+		$root.html('');
+	}
+
+	/**
+	 * @param {jQuery} $form
+	 * @param {string} html
+	 * @param {{reset?: boolean}} opcije reset=true → parent raspon; inače varijacija (prazno = prazan blok)
+	 */
+	function azurirajCjenik($form, html, opcije) {
 		var $root = nadjiRoot($form);
 		if (!$root.length) {
 			return;
 		}
 
 		zapamtiParentHtml($root);
+		opcije = opcije || {};
+
+		if (opcije.reset) {
+			if (!vratiParentHtml($root)) {
+				isprazniCjenik($root);
+			}
+			return;
+		}
 
 		if (typeof html === 'string' && html.length) {
 			var $tmp = $('<div>').append($.parseHTML(html));
@@ -51,19 +70,16 @@
 			return;
 		}
 
-		if (!vratiParentHtml($root)) {
-			$root.find('[data-farmaceut-cjenik-bazna]').empty();
-			$root.find('[data-farmaceut-cjenik-jedinicna]').attr('hidden', true).empty();
-			$root.find('[data-farmaceut-cjenik-omnibus]').attr('hidden', true).empty();
-		}
+		// Odabrana varijacija bez vlastitog cjenik HTML-a — ne vraćaj parent raspon.
+		isprazniCjenik($root);
 	}
 
 	$(document.body).on('found_variation', 'form.variations_form', function (event, variation) {
 		var html = variation && variation.farmaceut_cjenik_html ? variation.farmaceut_cjenik_html : '';
-		azurirajCjenik($(event.target), html);
+		azurirajCjenik($(event.target), html, { reset: false });
 	});
 
 	$(document.body).on('reset_data', 'form.variations_form', function (event) {
-		azurirajCjenik($(event.target), '');
+		azurirajCjenik($(event.target), '', { reset: true });
 	});
 })(jQuery);

@@ -100,6 +100,10 @@ function farmaceut_cjenik_html_cijena( WC_Product $proizvod, string $kontekst = 
 	}
 
 	if ( ! $dijelovi ) {
+		// Varijacija bez bazne/jedinične: prazan root (ne parent raspon).
+		if ( 'varijacija' === $kontekst ) {
+			return '<div class="farmaceut-cjenik farmaceut-cjenik--varijacija" data-farmaceut-cjenik-root></div>';
+		}
 		return '';
 	}
 
