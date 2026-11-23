@@ -3,11 +3,27 @@
 
 # Track Git configuration
 !/.gitignore
+!/.gitattributes
 
 !/README.md
 
 # GitHub Actions
 !/.github/
+
+# Composer (samo testne ovisnosti)
+!/composer.json
+!/composer.lock
+!/phpunit.xml.dist
+!/tests/
+!/bin/
+
+# Ignore Composer/vendor i lokalne testne artefakte (whitelist ih inače ne bi pratio)
+/vendor/
+/.phpunit.result.cache
+/.php-cli.ini
+/composer.phar
+/.env
+/.env.*
 
 # Allow custom code directories
 !/wp-content/

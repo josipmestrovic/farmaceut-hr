@@ -1,0 +1,27 @@
+{
+	"name": "josipmestrovic/farmaceut-hr",
+	"description": "Razvojne ovisnosti za WordPress integracijske testove Farmaceut.hr",
+	"type": "project",
+	"license": "proprietary",
+	"require": {
+		"php": ">=8.2"
+	},
+	"require-dev": {
+		"yoast/phpunit-polyfills": "^1.1",
+		"wp-phpunit/wp-phpunit": "7.1.*"
+	},
+	"config": {
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"test": "phpunit",
+		"test-instalacija": "bash bin/install-wp-tests.sh farmaceut_test root root 127.0.0.1 7.1.5"
+	},
+	"scripts-descriptions": {
+		"test": "Pokreće PHPUnit integracijske testove",
+		"test-instalacija": "Priprema izoliranu WordPress testnu infrastrukturu i bazu farmaceut_test"
+	}
+}

@@ -1,0 +1,91 @@
+name: Provjera koda
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: farmaceut-provjera-koda-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testovi:
+    name: PHP lint i integracijski testovi
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: farmaceut_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      WP_VERSION: "7.1.5"
+      DB_NAME: farmaceut_test
+      DB_USER: root
+      DB_PASS: root
+      DB_HOST: 127.0.0.1
+      WP_CORE_DIR: /tmp/wordpress
+      WP_TESTS_CONFIG_DIR: /tmp/wordpress-tests-lib
+      WP_PHPUNIT__DIR: ${{ github.workspace }}/vendor/wp-phpunit/wp-phpunit
+      WP_TESTS_DIR: ${{ github.workspace }}/vendor/wp-phpunit/wp-phpunit
+      WP_PHPUNIT__TESTS_CONFIG: /tmp/wordpress-tests-lib/wp-tests-config.php
+
+    steps:
+      - name: Preuzmi kod
+        uses: actions/checkout@v4
+
+      - name: Postavi PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli, mbstring, xml, curl, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Instaliraj Composer ovisnosti
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Provjeri PHP sintaksu teme i vlastitih pluginova
+        run: |
+          set -euo pipefail
+          find wp-content/themes/farmaceut -name '*.php' -print0 | xargs -0 -n1 php -l
+          shopt -s nullglob
+          for dir in wp-content/plugins/farmaceut-*; do
+            if [ -d "$dir" ]; then
+              find "$dir" -name '*.php' -print0 | xargs -0 -r -n1 php -l
+            fi
+          done
+
+      - name: Pripremi izolirano WordPress testno okruženje
+        run: |
+          set -euo pipefail
+          if [ "$DB_NAME" != "farmaceut_test" ]; then
+            echo "Zaštita: DB_NAME mora biti farmaceut_test."
+            exit 1
+          fi
+          bash bin/install-wp-tests.sh \
+            "$DB_NAME" \
+            "$DB_USER" \
+            "$DB_PASS" \
+            "$DB_HOST" \
+            "$WP_VERSION"
+
+      - name: Pokreni PHPUnit integracijske testove
+        run: composer test
