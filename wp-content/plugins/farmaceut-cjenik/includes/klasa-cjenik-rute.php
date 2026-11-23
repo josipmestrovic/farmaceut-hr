@@ -68,7 +68,9 @@ class Farmaceut_Cjenik_Cjenik_Rute {
 	private static function posalji_trenutni(): void {
 		$putanja = Farmaceut_Cjenik_Cjenik_Objava::putanja_trenutna();
 		$meta    = Farmaceut_Cjenik_Cjenik_Objava::meta_status();
-		if ( ! $putanja || ! file_exists( $putanja ) || 'ok' !== ( $meta['status'] ?? '' ) ) {
+
+		// Posljednji valjani CSV ostaje javan i kad je regeneracija stale/neuspjela.
+		if ( ! $putanja || ! file_exists( $putanja ) ) {
 			status_header( 503 );
 			nocache_headers();
 			header( 'Content-Type: text/plain; charset=UTF-8' );

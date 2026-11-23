@@ -97,11 +97,12 @@ class Farmaceut_Cjenik_Cjenik_Objava {
 		try {
 			$rezultat = Farmaceut_Cjenik_Cjenik_Graditelj::generiraj();
 			if ( is_wp_error( $rezultat ) ) {
-				$data = $rezultat->get_error_data();
+				$data   = $rezultat->get_error_data();
 				$greske = is_array( $data ) && isset( $data['greske'] ) ? implode( '; ', $data['greske'] ) : $rezultat->get_error_message();
+				$ima_file = ( self::putanja_trenutna() && file_exists( self::putanja_trenutna() ) );
 				self::spremi_status(
 					array(
-						'status' => 'greska',
+						'status' => $ima_file ? 'stale' : 'greska',
 						'greska' => $greske,
 					)
 				);
