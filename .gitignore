@@ -4,6 +4,10 @@
 # Track Git configuration
 !/.gitignore
 
+# Project docs
+!/README.md
+!/AGENTS.md
+
 # GitHub Actions
 !/.github/
 
@@ -16,7 +20,6 @@
 /wp-content/themes/*
 !/wp-content/themes/farmaceut/
 
-# Custom plugins
+# Custom plugins — whitelist each farmaceut-* plugin explicitly when added
 !/wp-content/plugins/
 /wp-content/plugins/*
-!/wp-content/plugins/farmaceut-core/
