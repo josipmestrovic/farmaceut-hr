@@ -1,0 +1,19 @@
+# Ignore everything by default
+/*
+
+# Track Git configuration
+!/.gitignore
+
+# Allow custom code directories
+!/wp-content/
+/wp-content/*
+
+# Custom themes
+!/wp-content/themes/
+/wp-content/themes/*
+!/wp-content/themes/farmaceut/
+
+# Custom plugins
+!/wp-content/plugins/
+/wp-content/plugins/*
+!/wp-content/plugins/farmaceut-core/
