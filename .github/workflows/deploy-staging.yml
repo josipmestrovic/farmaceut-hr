@@ -1,4 +1,3 @@
-
 name: Staging - ručni deployment
 
 on:
@@ -12,6 +11,10 @@ on:
         options:
           - dry-run
           - deploy
+      commit_sha:
+        description: "Puni SHA commita (40 znakova); prazno = aktualni main"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -22,12 +25,47 @@ concurrency:
 
 jobs:
   staging:
-    name: Prijenos teme na staging
+    name: Sinkronizacija teme na staging
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Preuzmi kod
+      - name: Preuzmi povijest repozitorija
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Odaberi i provjeri verziju za deployment
+        id: verzija
+        env:
+          REQUESTED_SHA: ${{ inputs.commit_sha }}
+          MAIN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          SHA="$MAIN_SHA"
+          if [[ -n "$REQUESTED_SHA" ]]; then
+            if [[ ! "$REQUESTED_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "Unesi puni SHA commita od 40 heksadekadskih znakova."
+              exit 1
+            fi
+            SHA="$REQUESTED_SHA"
+          fi
+
+          if ! git cat-file -e "${SHA}^{commit}" 2>/dev/null; then
+            echo "Traženi commit ne postoji."
+            exit 1
+          fi
+
+          if ! git merge-base --is-ancestor "$SHA" "$MAIN_SHA"; then
+            echo "Commit mora biti dio povijesti grane main."
+            exit 1
+          fi
+
+          git checkout --detach "$SHA"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Odabrani commit: $(git rev-parse HEAD)"
+          git log -1 --format='Opis: %s'
 
       - name: Pripremi SSH
         env:
@@ -44,7 +82,7 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Prenesi temu
+      - name: Sinkroniziraj samo Farmaceut temu
         env:
           MODE: ${{ inputs.nacin }}
           HOST: ${{ vars.STAGING_HOST }}
@@ -55,30 +93,47 @@ jobs:
           set -euo pipefail
 
           EXPECTED="/home/u1624-l711kuy5f9ig/www/staging.farmaceut.hr/public_html"
+          THEME="wp-content/themes/farmaceut"
+          REMOTE_THEME="$TARGET/$THEME"
 
           if [[ "$TARGET" != "$EXPECTED" ]]; then
-            echo "Pogrešna staging putanja!"
+            echo "Zaštita: staging putanja nije očekivana."
             exit 1
           fi
 
-          if [[ ! -f wp-content/themes/farmaceut/style.css ]]; then
-            echo "Farmaceut tema nije pronađena!"
+          if [[ ! -f "$THEME/style.css" || ! -f "$THEME/index.php" ]]; then
+            echo "Zaštita: nedostaju osnovne datoteke teme u odabranom commitu."
             exit 1
           fi
 
-          ARGS=(-avz --itemize-changes --no-perms --no-owner --no-group)
+          SSH=(ssh
+            -i "$HOME/.ssh/staging_key"
+            -p "$PORT"
+            -o IdentitiesOnly=yes
+            -o BatchMode=yes
+            -o StrictHostKeyChecking=yes
+          )
+
+          if ! "${SSH[@]}" "$USERNAME@$HOST" \
+            "test -f '$TARGET/wp-config.php' && test -d '$REMOTE_THEME' && test ! -L '$REMOTE_THEME'"; then
+            echo "Zaštita: staging WordPress ili direktorij teme nisu pronađeni."
+            exit 1
+          fi
+
+          ARGS=(-avz --itemize-changes --no-perms --no-owner --no-group --delete-delay)
 
           if [[ "$MODE" == "dry-run" ]]; then
             ARGS+=(--dry-run)
-            echo "TEST: datoteke se neće mijenjati."
+            echo "DRY RUN: prikaz prijenosa i brisanja, bez promjena."
           elif [[ "$MODE" == "deploy" ]]; then
-            echo "DEPLOY: prijenos na staging."
+            echo "DEPLOY: sinkronizacija teme, uključujući uklonjene datoteke."
           else
             echo "Nepoznat način rada."
             exit 1
           fi
 
+          echo "Verzija koda: $(git rev-parse HEAD)"
           rsync "${ARGS[@]}" \
             -e "ssh -i $HOME/.ssh/staging_key -p $PORT -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes" \
-            wp-content/themes/farmaceut/ \
-            "$USERNAME@$HOST:$TARGET/wp-content/themes/farmaceut/"
+            "$THEME/" \
+            "$USERNAME@$HOST:$REMOTE_THEME/"
