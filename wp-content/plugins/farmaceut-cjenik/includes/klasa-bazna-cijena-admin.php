@@ -191,23 +191,21 @@ class Farmaceut_Cjenik_Bazna_Cijena_Admin {
 		check_admin_referer( 'update-post_' . $post_id );
 
 		$cijena = isset( $_POST['_farmaceut_bazna_cijena'] ) ? wp_unslash( $_POST['_farmaceut_bazna_cijena'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( '' === $cijena ) {
-			return;
-		}
-
-		$rez = Farmaceut_Cjenik_Bazna_Cijena_Servis::spremi(
-			$proizvod,
-			array(
-				'cijena'    => $cijena,
-				'datum'     => isset( $_POST['_farmaceut_bazna_datum'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_datum'] ) ) : '',
-				'osnova'    => isset( $_POST['_farmaceut_bazna_osnova'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_osnova'] ) ) : '',
-				'izvor'     => isset( $_POST['_farmaceut_bazna_izvor'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_izvor'] ) ) : '',
-				'potvrdeno' => isset( $_POST['_farmaceut_bazna_potvrdeno'] ) ? 'yes' : 'no',
-			),
-			isset( $_POST['_farmaceut_bazna_razlog'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_razlog'] ) ) : ''
-		);
-		if ( is_wp_error( $rez ) && class_exists( 'WC_Admin_Meta_Boxes' ) ) {
-			WC_Admin_Meta_Boxes::add_error( $rez->get_error_message() );
+		if ( '' !== $cijena ) {
+			$rez = Farmaceut_Cjenik_Bazna_Cijena_Servis::spremi(
+				$proizvod,
+				array(
+					'cijena'    => $cijena,
+					'datum'     => isset( $_POST['_farmaceut_bazna_datum'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_datum'] ) ) : '',
+					'osnova'    => isset( $_POST['_farmaceut_bazna_osnova'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_osnova'] ) ) : '',
+					'izvor'     => isset( $_POST['_farmaceut_bazna_izvor'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_izvor'] ) ) : '',
+					'potvrdeno' => isset( $_POST['_farmaceut_bazna_potvrdeno'] ) ? 'yes' : 'no',
+				),
+				isset( $_POST['_farmaceut_bazna_razlog'] ) ? sanitize_text_field( wp_unslash( $_POST['_farmaceut_bazna_razlog'] ) ) : ''
+			);
+			if ( is_wp_error( $rez ) && class_exists( 'WC_Admin_Meta_Boxes' ) ) {
+				WC_Admin_Meta_Boxes::add_error( $rez->get_error_message() );
+			}
 		}
 
 		$proizvod = wc_get_product( $post_id );
@@ -234,34 +232,32 @@ class Farmaceut_Cjenik_Bazna_Cijena_Admin {
 		}
 
 		$cijene = isset( $_POST['variable_farmaceut_bazna_cijena'][ $loop ] ) ? wp_unslash( $_POST['variable_farmaceut_bazna_cijena'][ $loop ] ) : ''; // phpcs:ignore
-		if ( '' === $cijene ) {
-			return;
-		}
+		if ( '' !== $cijene ) {
+			$razlog = isset( $_POST['variable_farmaceut_bazna_razlog'][ $loop ] )
+				? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_razlog'][ $loop ] ) )
+				: '';
 
-		$razlog = isset( $_POST['variable_farmaceut_bazna_razlog'][ $loop ] )
-			? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_razlog'][ $loop ] ) )
-			: '';
-
-		$rez = Farmaceut_Cjenik_Bazna_Cijena_Servis::spremi(
-			$proizvod,
-			array(
-				'cijena'    => $cijene,
-				'datum'     => isset( $_POST['variable_farmaceut_bazna_datum'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_datum'][ $loop ] ) ) : '',
-				'osnova'    => isset( $_POST['variable_farmaceut_bazna_osnova'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_osnova'][ $loop ] ) ) : '',
-				'izvor'     => isset( $_POST['variable_farmaceut_bazna_izvor'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_izvor'][ $loop ] ) ) : '',
-				'potvrdeno' => isset( $_POST['variable_farmaceut_bazna_potvrdeno'][ $loop ] ) ? 'yes' : 'no',
-			),
-			$razlog
-		);
-		if ( is_wp_error( $rez ) && class_exists( 'WC_Admin_Meta_Boxes' ) ) {
-			WC_Admin_Meta_Boxes::add_error(
-				sprintf(
-					/* translators: 1: variation id 2: error message */
-					__( 'Varijacija #%1$d: %2$s', 'farmaceut-cjenik' ),
-					$variation_id,
-					$rez->get_error_message()
-				)
+			$rez = Farmaceut_Cjenik_Bazna_Cijena_Servis::spremi(
+				$proizvod,
+				array(
+					'cijena'    => $cijene,
+					'datum'     => isset( $_POST['variable_farmaceut_bazna_datum'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_datum'][ $loop ] ) ) : '',
+					'osnova'    => isset( $_POST['variable_farmaceut_bazna_osnova'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_osnova'][ $loop ] ) ) : '',
+					'izvor'     => isset( $_POST['variable_farmaceut_bazna_izvor'][ $loop ] ) ? sanitize_text_field( wp_unslash( $_POST['variable_farmaceut_bazna_izvor'][ $loop ] ) ) : '',
+					'potvrdeno' => isset( $_POST['variable_farmaceut_bazna_potvrdeno'][ $loop ] ) ? 'yes' : 'no',
+				),
+				$razlog
 			);
+			if ( is_wp_error( $rez ) && class_exists( 'WC_Admin_Meta_Boxes' ) ) {
+				WC_Admin_Meta_Boxes::add_error(
+					sprintf(
+						/* translators: 1: variation id 2: error message */
+						__( 'Varijacija #%1$d: %2$s', 'farmaceut-cjenik' ),
+						$variation_id,
+						$rez->get_error_message()
+					)
+				);
+			}
 		}
 
 		$proizvod = wc_get_product( $variation_id );
