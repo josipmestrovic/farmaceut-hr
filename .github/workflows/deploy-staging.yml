@@ -1,22 +1,40 @@
-name: Provjera staging veze
+
+name: Staging - ručni deployment
 
 on:
   workflow_dispatch:
+    inputs:
+      nacin:
+        description: "Način pokretanja"
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - dry-run
+          - deploy
 
 permissions:
   contents: read
 
+concurrency:
+  group: farmaceut-staging
+  cancel-in-progress: false
+
 jobs:
-  provjera:
-    name: Provjera SiteGround SSH pristupa
+  staging:
+    name: Prijenos teme na staging
     runs-on: ubuntu-latest
 
     steps:
+      - name: Preuzmi kod
+        uses: actions/checkout@v4
+
       - name: Pripremi SSH
         env:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
           KNOWN_HOSTS: ${{ vars.STAGING_KNOWN_HOSTS }}
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
@@ -26,20 +44,41 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Provjeri staging direktorije
+      - name: Prenesi temu
         env:
+          MODE: ${{ inputs.nacin }}
           HOST: ${{ vars.STAGING_HOST }}
           USERNAME: ${{ vars.STAGING_USER }}
           PORT: ${{ vars.STAGING_PORT }}
           TARGET: ${{ vars.STAGING_PATH }}
         run: |
-          ssh \
-            -i ~/.ssh/staging_key \
-            -o IdentitiesOnly=yes \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -p "$PORT" \
-            "$USERNAME@$HOST" \
-            "test -d '$TARGET/wp-content/themes' &&
-             test -d '$TARGET/wp-content/plugins' &&
-             echo 'SSH veza i staging direktoriji su ispravni.'"
+          set -euo pipefail
+
+          EXPECTED="/home/u1624-l711kuy5f9ig/www/staging.farmaceut.hr/public_html"
+
+          if [[ "$TARGET" != "$EXPECTED" ]]; then
+            echo "Pogrešna staging putanja!"
+            exit 1
+          fi
+
+          if [[ ! -f wp-content/themes/farmaceut/style.css ]]; then
+            echo "Farmaceut tema nije pronađena!"
+            exit 1
+          fi
+
+          ARGS=(-avz --itemize-changes --no-perms --no-owner --no-group)
+
+          if [[ "$MODE" == "dry-run" ]]; then
+            ARGS+=(--dry-run)
+            echo "TEST: datoteke se neće mijenjati."
+          elif [[ "$MODE" == "deploy" ]]; then
+            echo "DEPLOY: prijenos na staging."
+          else
+            echo "Nepoznat način rada."
+            exit 1
+          fi
+
+          rsync "${ARGS[@]}" \
+            -e "ssh -i $HOME/.ssh/staging_key -p $PORT -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes" \
+            wp-content/themes/farmaceut/ \
+            "$USERNAME@$HOST:$TARGET/wp-content/themes/farmaceut/"
