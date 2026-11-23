@@ -47,7 +47,7 @@ function farmaceut_cjenik_ucitaj_frontend_imovina() {
 }
 
 /**
- * Dodaje baznu/jediničnu/omnibus HTML u variation JSON.
+ * Dodaje baznu/jediničnu HTML u variation JSON.
  *
  * @param array                $podaci     Variation data.
  * @param WC_Product           $proizvod   Parent product.
@@ -73,7 +73,8 @@ function farmaceut_cjenik_dohvati_baznu( WC_Product $proizvod ) {
 }
 
 /**
- * HTML blok cijena (maloprodajna kontekst + bazna + jedinična + omnibus).
+ * HTML blok cijena (bazna + jedinična na single/varijaciji).
+ * Omnibus referenca ide u WC price_html kao prekrižena cijena.
  *
  * @param WC_Product $proizvod Product.
  * @param string     $kontekst card|single|varijacija.
@@ -82,21 +83,17 @@ function farmaceut_cjenik_dohvati_baznu( WC_Product $proizvod ) {
 function farmaceut_cjenik_html_cijena( WC_Product $proizvod, string $kontekst = 'card' ): string {
 	$dijelovi = array();
 
-	if ( class_exists( 'Farmaceut_Cjenik_Omnibus' ) ) {
-		$omnibus = Farmaceut_Cjenik_Omnibus::html_za_proizvod( $proizvod );
-		if ( $omnibus ) {
-			$dijelovi[] = $omnibus;
-		}
-	}
-
 	$bazna = Farmaceut_Cjenik_Bazna_Cijena_Servis::html( $proizvod, $kontekst );
 	if ( $bazna ) {
 		$dijelovi[] = $bazna;
 	}
 
-	$jedinicna = Farmaceut_Cjenik_Jedinicna_Cijena::html( $proizvod );
-	if ( $jedinicna ) {
-		$dijelovi[] = $jedinicna;
+	// Jedinična samo na single / varijaciji (ne na grid kartici).
+	if ( 'card' !== $kontekst ) {
+		$jedinicna = Farmaceut_Cjenik_Jedinicna_Cijena::html( $proizvod );
+		if ( $jedinicna ) {
+			$dijelovi[] = $jedinicna;
+		}
 	}
 
 	if ( ! $dijelovi ) {
@@ -121,11 +118,9 @@ function farmaceut_cjenik_ispisi_nakon_cijene() {
 
 	// Variable bez odabrane varijacije: raspon baznih ili prazno mjesto za JS.
 	if ( $product->is_type( 'variable' ) ) {
-		$html = Farmaceut_Cjenik_Bazna_Cijena_Servis::html_raspon_varijabilnog( $product );
-		$omnibus_placeholder = '<div class="farmaceut-cjenik__omnibus" data-farmaceut-cjenik-omnibus hidden></div>';
-		$jed_placeholder     = '<div class="farmaceut-cjenik__jedinicna" data-farmaceut-cjenik-jedinicna hidden></div>';
+		$html            = Farmaceut_Cjenik_Bazna_Cijena_Servis::html_raspon_varijabilnog( $product );
+		$jed_placeholder = '<div class="farmaceut-cjenik__jedinicna" data-farmaceut-cjenik-jedinicna hidden></div>';
 		echo '<div class="farmaceut-cjenik farmaceut-cjenik--single" data-farmaceut-cjenik-root>';
-		echo $omnibus_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in builders
 		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $jed_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</div>';

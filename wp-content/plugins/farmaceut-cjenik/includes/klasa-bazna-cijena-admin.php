@@ -386,8 +386,8 @@ class Farmaceut_Cjenik_Bazna_Cijena_Admin {
 					<?php if ( class_exists( 'Farmaceut_Cjenik_Omnibus' ) ) : ?>
 					<tr>
 						<th><?php esc_html_e( 'Omnibus prikaz (30 dana)', 'farmaceut-cjenik' ); ?></th>
-						<td><label><input type="checkbox" name="farmaceut_cjenik_postavke[omnibus_aktivan]" value="1" <?php checked( $s['omnibus_aktivan'], '1' ); ?> /> <?php esc_html_e( 'Prikaži najnižu cijenu u 30 dana uz akciju', 'farmaceut-cjenik' ); ?></label>
-						<p class="description"><?php esc_html_e( 'Uključite tek kad ste spremni isticati akcije. Do tada ne koristite −% / precrtane redovne cijene u marketinške svrhe.', 'farmaceut-cjenik' ); ?></p></td>
+						<td><label><input type="checkbox" name="farmaceut_cjenik_postavke[omnibus_aktivan]" value="1" <?php checked( $s['omnibus_aktivan'], '1' ); ?> /> <?php esc_html_e( 'Na akciji prekrižena cijena = najniža u 30 dana', 'farmaceut-cjenik' ); ?></label>
+						<p class="description"><?php esc_html_e( 'Kad je uključeno, umjesto redovne cijene prikazuje se Omnibus referenca (prekriženo) uz akcijsku. Postotak sniženja računa se od te reference.', 'farmaceut-cjenik' ); ?></p></td>
 					</tr>
 					<?php endif; ?>
 				</table>
