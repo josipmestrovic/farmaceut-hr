@@ -4,6 +4,9 @@
 # Track Git configuration
 !/.gitignore
 
+# GitHub Actions
+!/.github/
+
 # Allow custom code directories
 !/wp-content/
 /wp-content/*

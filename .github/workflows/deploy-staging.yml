@@ -1,0 +1,45 @@
+name: Provjera staging veze
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  provjera:
+    name: Provjera SiteGround SSH pristupa
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pripremi SSH
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.STAGING_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/staging_key
+          chmod 600 ~/.ssh/staging_key
+
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Provjeri staging direktorije
+        env:
+          HOST: ${{ vars.STAGING_HOST }}
+          USERNAME: ${{ vars.STAGING_USER }}
+          PORT: ${{ vars.STAGING_PORT }}
+          TARGET: ${{ vars.STAGING_PATH }}
+        run: |
+          ssh \
+            -i ~/.ssh/staging_key \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "$PORT" \
+            "$USERNAME@$HOST" \
+            "test -d '$TARGET/wp-content/themes' &&
+             test -d '$TARGET/wp-content/plugins' &&
+             echo 'SSH veza i staging direktoriji su ispravni.'"
