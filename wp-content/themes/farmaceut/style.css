@@ -1,7 +1,13 @@
 /*
 Theme Name: Farmaceut
 Theme URI: https://farmaceut.hr
+Author: Farmaceut.hr
 Description: Prilagođena WordPress tema za Farmaceut.hr.
 Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
 Text Domain: farmaceut
 */
+
+/* Stilovi teme učitavaju se iz assets/css/glavni.css. */
