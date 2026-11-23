@@ -132,16 +132,12 @@ class Farmaceut_Cjenik_Bazna_Cijena_Admin {
 				'id'            => $name( 'bazna_potvrdeno' ),
 				'name'          => $name( 'bazna_potvrdeno' ),
 				'label'         => __( 'Potvrđeno', 'farmaceut-cjenik' ),
-				'value'         => 'yes',
+				'value'         => $potvrdeno ? 'yes' : 'no',
 				'cbvalue'       => 'yes',
 				'description'   => __( 'Merchant je potvrdio povijesni iznos.', 'farmaceut-cjenik' ),
 				'wrapper_class' => '' === $sufiks ? '' : 'form-row form-row-last',
 			)
 		);
-		// Checkbox value workaround for pre-checked.
-		if ( $potvrdeno && '' === $sufiks ) {
-			// woocommerce_wp_checkbox uses get_post_meta; set via filter below not needed if we pass checked.
-		}
 
 		woocommerce_wp_text_input(
 			array(
