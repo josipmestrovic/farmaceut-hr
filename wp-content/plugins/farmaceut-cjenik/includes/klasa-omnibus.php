@@ -40,8 +40,8 @@ class Farmaceut_Cjenik_Omnibus {
 		}
 
 		$cijena = (float) $proizvod->get_price();
-		self::dodaj_u_povijest( $proizvod, $cijena );
 
+		// Referencu zamrzni PRIJE upisa trenutne (sale) cijene u povijest.
 		if ( $proizvod->is_on_sale() ) {
 			$postojeca = $proizvod->get_meta( self::META_REFERENCA, true );
 			if ( '' === $postojeca || null === $postojeca ) {
@@ -52,13 +52,13 @@ class Farmaceut_Cjenik_Omnibus {
 					$proizvod->save();
 				}
 			}
-		} else {
-			if ( $proizvod->get_meta( self::META_REFERENCA, true ) ) {
-				$proizvod->delete_meta_data( self::META_REFERENCA );
-				$proizvod->delete_meta_data( self::META_REFERENCA_OD );
-				$proizvod->save();
-			}
+		} elseif ( $proizvod->get_meta( self::META_REFERENCA, true ) ) {
+			$proizvod->delete_meta_data( self::META_REFERENCA );
+			$proizvod->delete_meta_data( self::META_REFERENCA_OD );
+			$proizvod->save();
 		}
+
+		self::dodaj_u_povijest( $proizvod, $cijena );
 	}
 
 	/**
