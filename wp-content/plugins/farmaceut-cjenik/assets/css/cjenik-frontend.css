@@ -1,0 +1,39 @@
+/**
+ * Prikaz bazne, jedinične i Omnibus cijene.
+ */
+
+.farmaceut-cjenik {
+	margin-top: 0.35rem;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	color: #333;
+}
+
+.farmaceut-cjenik__bazna,
+.farmaceut-cjenik__jedinicna,
+.farmaceut-cjenik__omnibus {
+	display: block;
+	margin-top: 0.15rem;
+}
+
+.farmaceut-cjenik__bazna-label,
+.farmaceut-cjenik__jedinicna-label,
+.farmaceut-cjenik__omnibus-label {
+	font-weight: 500;
+}
+
+.farmaceut-cjenik__bazna-iznos,
+.farmaceut-cjenik__jedinicna-iznos,
+.farmaceut-cjenik__omnibus-iznos {
+	font-weight: 400;
+}
+
+.farmaceut-cjenik__omnibus-postotak {
+	color: #555;
+}
+
+/* Bazna se nikad ne precrtava. */
+.farmaceut-cjenik__bazna del,
+.farmaceut-cjenik__bazna s {
+	text-decoration: none;
+}
