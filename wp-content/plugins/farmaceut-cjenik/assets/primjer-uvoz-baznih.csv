@@ -1,0 +1,3 @@
+product_id;sku;bazna_cijena;bazna_datum;bazna_osnova;izvor;potvrdeno;neto_kolicina;neto_jedinica
+;SUPPLEMENT-001;22.50;2025-05-02;osnova_2025;povijesni cjenik 2025-05;yes;60;g
+;SUPPLEMENT-002;18.90;2026-01-15;prva_ponuda;prva ponuda u webshopu;yes;120;ml

@@ -37,3 +37,4 @@
 # Custom plugins — whitelist each farmaceut-* plugin explicitly when added
 !/wp-content/plugins/
 /wp-content/plugins/*
+!/wp-content/plugins/farmaceut-cjenik/

@@ -52,3 +52,8 @@ function farmaceut_ucitaj_stilove() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'farmaceut_ucitaj_stilove' );
+
+$farmaceut_woocommerce = get_template_directory() . '/inc/woocommerce.php';
+if ( file_exists( $farmaceut_woocommerce ) ) {
+	require_once $farmaceut_woocommerce;
+}
