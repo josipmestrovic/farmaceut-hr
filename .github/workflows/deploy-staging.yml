@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   staging:
-    name: Sinkronizacija teme na staging
+    name: Sinkronizacija teme i plugina na staging
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
@@ -82,7 +82,7 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Sinkroniziraj samo Farmaceut temu
+      - name: Sinkroniziraj temu i plugin farmaceut-cjenik
         env:
           MODE: ${{ inputs.nacin }}
           HOST: ${{ vars.STAGING_HOST }}
@@ -94,7 +94,9 @@ jobs:
 
           EXPECTED="/home/u1624-l711kuy5f9ig/www/staging.farmaceut.hr/public_html"
           THEME="wp-content/themes/farmaceut"
+          PLUGIN="wp-content/plugins/farmaceut-cjenik"
           REMOTE_THEME="$TARGET/$THEME"
+          REMOTE_PLUGIN="$TARGET/$PLUGIN"
 
           if [[ "$TARGET" != "$EXPECTED" ]]; then
             echo "Zaštita: staging putanja nije očekivana."
@@ -103,6 +105,11 @@ jobs:
 
           if [[ ! -f "$THEME/style.css" || ! -f "$THEME/index.php" ]]; then
             echo "Zaštita: nedostaju osnovne datoteke teme u odabranom commitu."
+            exit 1
+          fi
+
+          if [[ ! -f "$PLUGIN/farmaceut-cjenik.php" ]]; then
+            echo "Zaštita: nedostaje plugin farmaceut-cjenik u odabranom commitu."
             exit 1
           fi
 
@@ -120,20 +127,22 @@ jobs:
             exit 1
           fi
 
+          "${SSH[@]}" "$USERNAME@$HOST" "mkdir -p '$REMOTE_PLUGIN'"
+
           ARGS=(-avz --itemize-changes --no-perms --no-owner --no-group --delete-delay)
 
           if [[ "$MODE" == "dry-run" ]]; then
             ARGS+=(--dry-run)
             echo "DRY RUN: prikaz prijenosa i brisanja, bez promjena."
           elif [[ "$MODE" == "deploy" ]]; then
-            echo "DEPLOY: sinkronizacija teme, uključujući uklonjene datoteke."
+            echo "DEPLOY: sinkronizacija teme i plugina, uključujući uklonjene datoteke."
           else
             echo "Nepoznat način rada."
             exit 1
           fi
 
           echo "Verzija koda: $(git rev-parse HEAD)"
-          rsync "${ARGS[@]}" \
-            -e "ssh -i $HOME/.ssh/staging_key -p $PORT -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes" \
-            "$THEME/" \
-            "$USERNAME@$HOST:$REMOTE_THEME/"
+          RSYNC_E="ssh -i $HOME/.ssh/staging_key -p $PORT -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes"
+
+          rsync "${ARGS[@]}" -e "$RSYNC_E" "$THEME/" "$USERNAME@$HOST:$REMOTE_THEME/"
+          rsync "${ARGS[@]}" -e "$RSYNC_E" "$PLUGIN/" "$USERNAME@$HOST:$REMOTE_PLUGIN/"
