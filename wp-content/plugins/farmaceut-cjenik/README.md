@@ -14,8 +14,8 @@ Ovaj tekst nije pravni savjet. Povijesne iznose i klasifikaciju proizvoda potvr�
 | --- | --- | --- |
 | **Maloprodajna** | Što kupac plaća danas | Uvijek |
 | **Bazna** | Povijesna cijena na referentni dan ili na dan prve ponude | Uvijek uz maloprodajnu |
-| **Jedinična** | Npr. cijena po 100 g ili 100 ml | Kad je upisana neto količina |
-| **Najniža u 30 dana** (Omnibus) | Referenca uz istaknutu akciju / sniženje | Samo ako je Omnibus uključen i proizvod je na akciji |
+| **Jedinična** | Npr. cijena po 100 g ili 100 ml | Samo na stranici proizvoda, kad je upisana neto količina |
+| **Najniža u 30 dana** (Omnibus) | Referenca uz istaknutu akciju / sniženje | Ako je Omnibus uključen i proizvod je na akciji — kao **prekrižena** cijena uz akcijsku |
 
 Važno:
 
@@ -48,12 +48,10 @@ Dodaci prehrani tipično spadaju u skupinu **hrane** → bazna cijena prema danu
 
 ## Gdje kupac vidi cijene
 
-- **Stranica proizvoda** — ispod maloprodajne cijene (npr. „Cijena na 2. 5. 2025.: …“ i jedinična cijena).
-- **Popis proizvoda (grid)** — shop, kategorije i ostala mjesta gdje WooCommerce ispisuje cijenu na kartici.
-- **Proizvodi s varijacijama** (npr. različita pakiranja) — bez odabira: raspon baznih cijena; nakon odabira: točna bazna te varijacije.
+- **Stranica proizvoda** — maloprodajna (na akciji: akcijska + prekrižena Omnibus referenca), ispod nje bazna („Cijena na …“) i jedinična cijena.
+- **Popis proizvoda (grid)** — ista maloprodajna / Omnibus logika + bazna; **bez** jedinične cijene.
+- **Proizvodi s varijacijama** (npr. različita pakiranja) — bez odabira: raspon baznih cijena; nakon odabira: Omnibus u `price_html` varijacije + točna bazna / jedinična.
 - **Javni cjenik** — stranica `/cjenici` s poveznicom na `/cjenici/roba.csv` i arhivom starijih verzija.
-
-Uz akciju (samo kad je Omnibus uključen u postavkama): oznaka najniže cijene u 30 dana.
 
 Plugin **ne mijenja** iznose u košarici ni na naplati — tamo ostaje uobičajena WooCommerce cijena narudžbe.
 
@@ -67,7 +65,7 @@ Plugin **ne mijenja** iznose u košarici ni na naplati — tamo ostaje uobičaje
 - Postavke za naziv datoteke cjenika (**OIB**, oznaka prodajnog mjesta ili „isti cjenik za sva mjesta“).
 - **Uvoz** baznih cijena iz CSV datoteke (najprije pregled / dry-run, zatim pravi uvoz). Primjer: `assets/primjer-uvoz-baznih.csv`.
 - **Regeneriraj cjenik** — ručno osvježavanje javnog CSV-a.
-- Uključivanje **Omnibusa** (prikaz najniže cijene u 30 dana uz akciju).
+- Uključivanje **Omnibusa** (prekrižena cijena = najniža u 30 dana uz akciju).
 
 ### Na pojedinom proizvodu ili varijaciji
 

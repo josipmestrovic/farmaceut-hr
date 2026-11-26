@@ -26,6 +26,38 @@ class Farmaceut_Cjenik_Omnibus {
 		add_action( 'woocommerce_update_product_variation', array( __CLASS__, 'pri_azuriranju_proizvoda' ), 20 );
 		add_action( 'woocommerce_new_product', array( __CLASS__, 'pri_azuriranju_proizvoda' ), 20 );
 		add_action( 'woocommerce_new_product_variation', array( __CLASS__, 'pri_azuriranju_proizvoda' ), 20 );
+		add_filter( 'woocommerce_get_price_html', array( __CLASS__, 'filtriraj_price_html' ), 15, 2 );
+	}
+
+	/**
+	 * Na akciji zamjenjuje WC prekriženu (regular) s Omnibus referentom.
+	 *
+	 * @param string     $html     Price HTML.
+	 * @param WC_Product $proizvod Product.
+	 * @return string
+	 */
+	public static function filtriraj_price_html( $html, $proizvod ): string {
+		if ( ! $proizvod instanceof WC_Product ) {
+			return (string) $html;
+		}
+		if ( ! Farmaceut_Cjenik_Postavke::omnibus_aktivan() ) {
+			return (string) $html;
+		}
+		// Varijabilni parent: ostavi WC raspon; referenca je na razini varijacije.
+		if ( $proizvod->is_type( 'variable' ) ) {
+			return (string) $html;
+		}
+		if ( ! $proizvod->is_on_sale() ) {
+			return (string) $html;
+		}
+
+		$ref = self::referenca( $proizvod );
+		if ( null === $ref ) {
+			return (string) $html;
+		}
+
+		$akcijska = (float) $proizvod->get_price();
+		return wc_format_sale_price( wc_price( (float) $ref ), wc_price( $akcijska ) );
 	}
 
 	/**
@@ -172,7 +204,7 @@ class Farmaceut_Cjenik_Omnibus {
 	}
 
 	/**
-	 * HTML Omnibus oznake (samo ako je postavka uključena).
+	 * HTML zasebne Omnibus oznake (legacy; prikaz ide preko filtriraj_price_html).
 	 *
 	 * @param WC_Product $proizvod Product.
 	 * @return string
